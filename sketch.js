@@ -1,7 +1,7 @@
 let isPlaying = false;
 
 let circles = [];
-let numCircles = 12; // 12circles-12hours
+let numCircles; 
 
 let particles = [];
 
@@ -42,7 +42,7 @@ function setup() {
     document.getElementById('pauseButton').addEventListener('click', pauseMusic);
 
     for (let i = 0; i < numCircles; i++) {
-        let angle = map(i, 0, numCircles, 0, TWO_PI); // angle of each circle
+        let angle = map(i, 0, numCircles, -HALF_PI, HALF_PI + PI); // angle of each circle
         let x = centerX + cos(angle) * radius; 
         let y = centerY + sin(angle) * radius; 
         circles.push({ x, y }); // save the location of circles
@@ -120,17 +120,17 @@ function draw() {
 
 function generateCircles() {
     circles = [];
-    let totalCircles = hour() || 1; // Ensure at least one circle
-    let angleStep = 360 / totalCircles;
+    let totalCircles = hour(); // Ensure at least one circle
+    let angleStep = 360 / 24;
 
     for (let i = 0; i < totalCircles; i++) {
-        let angle = i * angleStep; 
+        let angle = -90 + i * angleStep; 
         circles.push(new FallingCircle(i, angle, totalCircles));
     }
 
 
     if (currentHour === 0) {
-        circles.push(new FallingCircle(0, 0, 1)); // 仍然生成一个圆圈
+        circles.push(new FallingCircle(0, -90, 1)); // 仍然生成一个圆圈
     }
 }
 
@@ -149,17 +149,30 @@ class FallingCircle {
 
     update() {
         if (this.isFalling) {
+
             this.y += this.speedY; 
-            
+            this.x = lerp(this.x, this.targetX, 0.05);
+
             if (this.y >= this.targetY) {
                 this.y = this.targetY; 
-                this.isFalling = false; 
-                console.log(`Circle ${this.index} has stopped at ${this.y}`);
             }
-            this.x = lerp(this.x, this.targetX, 0.05);
+
+            if (this.x >= this.targetX){
+                this.x = this.targetX; 
+            }
+
+            if(this.x == this.targetX && this.y == this.targetY ){
+                this.isFalling = false; 
+            }
         }
+        
         //Breath
         this.size = map(sin(frameCount * 0.5), -1, 1, 1, 40);
+        console.log("x: "+this.x);
+        console.log("y: "+this.y);
+        console.log("tx: "+this.targetX);
+        console.log("ty: "+this.targetY);
+
     }
 
     display() {
@@ -202,21 +215,21 @@ function drawTaijiSymbol() {
     fill(255);
     ellipse(0, 0, 300, 300);
     
-        fill(0);
-        arc(0, 0, 300, 300, 90, 270, CHORD);
-        fill(255);
-        arc(0, 0, 300, 300, -90, 90, CHORD);
+    fill(0);
+    arc(0, 0, 300, 300, 90, 270, CHORD);
+    fill(255);
+    arc(0, 0, 300, 300, -90, 90, CHORD);
     
-        noStroke();
-        fill(255);
-        ellipse(0, 75, 150, 150);
-        fill(0);
-        ellipse(0, -75, 150, 150);
+    noStroke();
+    fill(255);
+    ellipse(0, 75, 150, 150);
+    fill(0);
+    ellipse(0, -75, 150, 150);
     
-        fill(255);
-        ellipse(0, -75, 50, 50);
-        fill(0);
-        ellipse(0, 75, 50, 50);
+    fill(255);
+    ellipse(0, -75, 50, 50);
+    fill(0);
+    ellipse(0, 75, 50, 50);
     }
 
 function updateAudioParameters() {
